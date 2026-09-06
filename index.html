@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RCA Service Design — Induction & Unit 1</title>
+<style>
+  :root{
+    --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --ink:#0e0e0e;
+    --paper:#f5f3ee;
+    --line:#0e0e0e;
+    --battersea:#e8542c;
+    --kensington:#1f7a5c;
+    --whitecity:#2c5ba0;
+    --online:#6b5b95;
+    --muted:#6b6a63;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-system);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px;}
+
+  header.hero{
+    border-bottom:3px solid var(--ink);
+    padding-bottom:20px;
+    margin-bottom:22px;
+  }
+  .eyebrow{
+    font-family:var(--font-system);
+    font-size:12px;
+    letter-spacing:0.02em;
+    color:var(--muted);
+    margin:0 0 6px;
+  }
+  h1{
+    font-size:clamp(32px,6vw,52px);
+    line-height:0.98;
+    margin:0 0 10px;
+    font-weight:700;
+    letter-spacing:-0.02em;
+  }
+  h1 span{color:var(--battersea);}
+  .sub{
+    font-size:15px;
+    color:var(--muted);
+    max-width:560px;
+    line-height:1.5;
+    margin:0;
+  }
+
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    margin:18px 0 26px;
+    font-family:var(--font-system);
+    font-size:12px;
+  }
+  .legend-item{display:flex;align-items:center;gap:6px;}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+
+  .info-strip{
+    background:var(--ink);
+    color:var(--paper);
+    padding:16px 18px;
+    margin-bottom:28px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:14px;
+  }
+  .info-strip div h3{
+    font-family:var(--font-system);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    margin:0 0 4px;
+    color:#c9c7bd;
+  }
+  .info-strip div p{
+    margin:0;
+    font-size:13px;
+    line-height:1.45;
+  }
+
+  .tabs{
+    display:flex;
+    overflow-x:auto;
+    gap:2px;
+    margin-bottom:0;
+    border-bottom:3px solid var(--ink);
+    scrollbar-width:none;
+  }
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{
+    flex:0 0 auto;
+    padding:10px 14px 12px;
+    font-family:var(--font-system);
+    font-size:12px;
+    background:transparent;
+    border:none;
+    border-bottom:3px solid transparent;
+    margin-bottom:-3px;
+    cursor:pointer;
+    color:var(--muted);
+    text-align:left;
+    line-height:1.3;
+  }
+  .tab .d{display:block;font-size:15px;font-family:var(--font-system);font-weight:500;color:var(--ink);}
+  .tab.active{
+    border-bottom-color:var(--battersea);
+    color:var(--ink);
+  }
+  .tab .count{
+    font-size:10px;
+    color:var(--muted);
+  }
+  .tab.active .count{color:var(--battersea);}
+
+  .day-panel{display:none;padding-top:20px;}
+  .day-panel.active{display:block;}
+
+  .event{
+    background:var(--card);
+    border:1px solid var(--ink);
+    padding:14px 16px;
+    margin-bottom:10px;
+    display:grid;
+    grid-template-columns:76px 1fr;
+    gap:14px;
+    align-items:start;
+  }
+  .event .time{
+    font-family:var(--font-system);
+    font-size:12px;
+    color:var(--ink);
+    padding-top:2px;
+    line-height:1.4;
+  }
+  .event .body h4{
+    margin:0 0 4px;
+    font-size:16px;
+    font-weight:500;
+  }
+  .event .meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+    margin-bottom:6px;
+  }
+  .campus-tag{
+    font-family:var(--font-system);
+    font-size:11px;
+    padding:2px 8px;
+    color:#fff;
+    display:inline-block;
+  }
+  .book-tag{
+    font-family:var(--font-system);
+    font-size:11px;
+    padding:2px 8px;
+    border:1px solid var(--ink);
+    color:var(--ink);
+  }
+  .event .loc{
+    font-size:13px;
+    color:var(--muted);
+    margin:0 0 4px;
+  }
+  .event .desc{
+    font-size:13px;
+    color:#3a3a37;
+    line-height:1.5;
+    margin:0;
+  }
+  .event a{color:var(--ink);}
+
+  .repeat-note{
+    font-family:var(--font-system);
+    font-size:12px;
+    color:var(--muted);
+    padding:10px 0 4px;
+    border-top:1px dashed var(--muted);
+    margin-top:16px;
+  }
+
+  .mode-switch{
+    display:flex;
+    gap:0;
+    margin-bottom:22px;
+    border:2px solid var(--ink);
+  }
+  .mode-btn{
+    flex:1;
+    padding:12px 10px;
+    font-family:var(--font-system);
+    font-size:12px;
+    letter-spacing:0.02em;
+    background:transparent;
+    border:none;
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .mode-btn + .mode-btn{border-left:2px solid var(--ink);}
+  .mode-btn.active{background:var(--ink);color:var(--paper);}
+
+  .mode-panel{display:none;}
+  .mode-panel.active{display:block;}
+
+  .unit-table-scroll{
+    overflow-x:auto;
+    border:1px solid var(--ink);
+    -webkit-overflow-scrolling:touch;
+  }
+  table.unit-table{
+    border-collapse:collapse;
+    width:100%;
+    min-width:760px;
+    table-layout:fixed;
+  }
+  table.unit-table col.wk-col{width:110px;}
+  table.unit-table col.day-col{width:auto;}
+  table.unit-table thead th{
+    position:sticky;
+    top:0;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--font-system);
+    font-size:11px;
+    font-weight:500;
+    letter-spacing:0.04em;
+    padding:10px 12px;
+    text-align:left;
+    z-index:1;
+  }
+  table.unit-table thead th:first-child{z-index:2;}
+  table.unit-table tbody th{
+    background:var(--paper);
+    text-align:left;
+    vertical-align:top;
+    padding:12px 12px;
+    border-top:1px solid var(--ink);
+    border-right:1px solid var(--ink);
+    font-family:var(--font-system);
+  }
+  table.unit-table tbody th .wk{display:block;font-size:13px;font-weight:500;color:var(--ink);}
+  table.unit-table tbody th .wkdate{display:block;font-size:11px;color:var(--muted);margin-top:2px;}
+  table.unit-table tbody td{
+    vertical-align:top;
+    padding:12px 12px;
+    border-top:1px solid var(--ink);
+    border-left:1px solid #d8d5cc;
+  }
+  table.unit-table tbody td .act{
+    font-size:13px;
+    font-weight:500;
+    line-height:1.35;
+    margin:0 0 4px;
+  }
+  table.unit-table tbody td .loc{
+    font-size:11px;
+    color:var(--muted);
+    line-height:1.4;
+    margin:0;
+  }
+  table.unit-table tbody td.empty{background:repeating-linear-gradient(135deg,transparent,transparent 6px,#eae7de 6px,#eae7de 7px);}
+  table.unit-table tbody td.empty .act{color:var(--muted);font-weight:400;}
+  .unit-scroll-hint{
+    font-family:var(--font-system);
+    font-size:11px;
+    color:var(--muted);
+    margin:8px 0 16px;
+  }
+
+  .unit-desktop{display:block;}
+  .unit-mobile{display:none;}
+
+  @media (max-width:640px){
+    .unit-desktop{display:none;}
+    .unit-mobile{display:block;}
+  }
+
+  .unit-week-card{
+    border:1px solid var(--ink);
+    margin-bottom:14px;
+  }
+  .unit-week-card-head{
+    background:var(--ink);
+    color:var(--paper);
+    padding:10px 14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+  }
+  .unit-week-card-head .wk{font-size:13px;font-weight:500;}
+  .unit-week-card-head .wkdate{font-size:12px;color:#c9c7bd;}
+  .unit-row{
+    display:flex;
+    gap:12px;
+    padding:10px 14px;
+    border-top:1px solid #d8d5cc;
+  }
+  .unit-row:first-of-type{border-top:none;}
+  .unit-row .dow{
+    flex:0 0 28px;
+    font-size:12px;
+    font-weight:500;
+    color:var(--muted);
+    padding-top:1px;
+  }
+  .unit-row .content{flex:1;min-width:0;}
+  .unit-row .act{font-size:13px;font-weight:500;line-height:1.35;margin:0 0 2px;}
+  .unit-row .loc{font-size:11px;color:var(--muted);line-height:1.4;margin:0;}
+  .unit-row.empty .act{color:var(--muted);font-weight:400;}
+
+  footer{
+    margin-top:36px;
+    padding-top:16px;
+    border-top:1px solid var(--muted);
+    font-family:var(--font-system);
+    font-size:11px;
+    color:var(--muted);
+  }
+
+  @media (max-width:480px){
+    .event{grid-template-columns:1fr;}
+    .event .time{padding-top:0;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">ROYAL COLLEGE OF ART — SERVICE DESIGN</p>
+    <h1>Term<br>Schedule<span>.</span></h1>
+    <p class="sub">7 September – 19 October 2026 · Induction(2주) + Unit 1(7주) 시간표.</p>
+  </header>
+
+  <div class="mode-switch">
+    <button class="mode-btn active" data-mode="welcome">Induction / Welcome Week</button>
+    <button class="mode-btn" data-mode="unit1">Unit 1</button>
+  </div>
+
+  <div class="mode-panel active" id="mode-welcome">
+
+  <div class="legend">
+    <div class="legend-item"><span class="dot" style="background:var(--battersea)"></span>Battersea</div>
+    <div class="legend-item"><span class="dot" style="background:var(--kensington)"></span>Kensington</div>
+    <div class="legend-item"><span class="dot" style="background:var(--whitecity)"></span>White City</div>
+    <div class="legend-item"><span class="dot" style="background:var(--online)"></span>Online / 기타</div>
+  </div>
+
+  <div class="info-strip">
+    <div>
+      <h3>Campus tours</h3>
+      <p>매일(월–금) 10:30 / 11:30 / 12:30 — DesignBar(Battersea), Courtyard Galleries(Kensington), Garden House(White City)에서 출발</p>
+    </div>
+    <div>
+      <h3>ID card 수령 (Service Design MA)</h3>
+      <p>목요일 9/10 · 13:00–15:00 · Hangar Space, Studio Building, Battersea Campus · 여권(실물) 지참 필수. 시간 놓치면 9/14 주부터 캠퍼스 리셉션에서 수령 가능</p>
+    </div>
+    <div>
+      <h3>INCLUDE London 2026</h3>
+      <p>ID 카드 수령 시 Hangar 공간에서 전시 일부 관람 가능</p>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+  <div id="panels"></div>
+
+  <p class="repeat-note">출처: rca.ac.uk/news-and-events/events/welcome-events-2026 · 세부 시간·장소는 변경될 수 있으니 예약 필요한 행사는 Eventbrite에서 재확인하세요.</p>
+  </div>
+
+  <div class="mode-panel" id="mode-unit1">
+    <div class="unit-desktop">
+      <p class="unit-scroll-hint">← 화면이 좁으면 표를 옆으로 밀어보세요</p>
+      <div class="unit-table-scroll">
+        <table class="unit-table">
+          <colgroup>
+            <col class="wk-col">
+            <col class="day-col"><col class="day-col"><col class="day-col"><col class="day-col"><col class="day-col">
+          </colgroup>
+          <thead>
+            <tr>
+              <th></th>
+              <th>월</th><th>화</th><th>수</th><th>목</th><th>금</th>
+            </tr>
+          </thead>
+          <tbody id="unit1-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="unit-mobile">
+      <div id="unit1-cards"></div>
+    </div>
+
+    <p class="repeat-note">출처: Unit 1 Timetable Overview 2026 v2 (PDF) · Week 5(10/5)는 요일별 정확한 장소 정보가 표에 없어 전부 '장소 미정(TBC)'으로 표시했습니다. Tutorial/Independent Study의 세부 시간·방은 추후 공지 예정입니다.</p>
+  </div>
+
+  <footer>Royal College of Art · Service Design · 2026/27</footer>
+</div>
+
+<script>
+const CAMPUS_COLOR = {
+  Battersea: 'var(--battersea)',
+  Kensington: 'var(--kensington)',
+  'White City': 'var(--whitecity)',
+  Online: 'var(--online)'
+};
+
+const days = [
+  { label: 'Mon', date: '7 Sep', events: [
+    { time: '18:00–24:00', title: 'Welcome mixer', campus: 'Kensington', loc: 'ArtBar, Frayling Building', desc: 'Meet your peers and meet the ArtBar on your first day.', book:false }
+  ]},
+  { label: 'Tue', date: '8 Sep', events: [
+    { time: '10:00–12:00', title: 'Stars Gym', campus: 'Battersea', loc: 'DesignBar, Dyson Building', desc: '10초 로잉 챌린지. 참가자 전원 7일 무료 이용권 증정.', book:false },
+    { time: '13:00–15:00', title: 'Welcome picnic', campus: 'Battersea', loc: 'Battersea Park (Dyson Building 앞 12:00 집결)', desc: '점심 도시락 제공되는 웰컴 피크닉.', book:false },
+    { time: '13:00–14:00', title: 'InnovationRCA welcome talk', campus: 'Battersea', loc: 'Gorvy Lecture Theatre, Dyson Building', desc: 'InnovationRCA 소개 및 창업 지원 프로그램 안내.', book:true },
+    { time: '14:00–16:00', title: 'President & Vice-Chancellor welcome (Battersea)', campus: 'Battersea', loc: 'DesignBar, Dyson Building', desc: 'Professor Christoph Lindner의 웰컴 리셉션. 인원 제한.', book:true },
+    { time: '17:00–', title: 'Board games evening', campus: 'Kensington', loc: 'ArtBar, Frayling Building', desc: '보드게임과 함께하는 저녁.', book:false }
+  ]},
+  { label: 'Wed', date: '9 Sep', events: [
+    { time: '11:00–13:00', title: 'Stars Gym', campus: 'Battersea', loc: 'DesignBar, Dyson Building', desc: '로잉 챌린지 데이 2.', book:false },
+    { time: '13:00–15:00', title: 'Welcome picnic', campus: 'Kensington', loc: 'Hyde Park', desc: '무료 점심 피크닉.', book:false },
+    { time: '13:00–15:00', title: 'Welcome picnic', campus: 'White City', loc: 'Garden House', desc: '무료 점심 피크닉.', book:false },
+    { time: '13:00–14:00', title: 'InnovationRCA welcome talk', campus: 'Kensington', loc: 'Lecture Theatre 1, Darwin Building', desc: 'InnovationRCA 소개 및 창업 지원 프로그램 안내.', book:true },
+    { time: '18:00–24:00', title: "ArtBar: Drinks 'Stock Market' evening", campus: 'Kensington', loc: 'ArtBar, Frayling Building', desc: '주문량에 따라 술값이 오르내리는 이벤트.', book:false }
+  ]},
+  { label: 'Thu', date: '10 Sep', events: [
+    { time: '10:00–13:00, 14:00–17:00', title: 'Technical Services Festival', campus: 'Battersea', loc: 'DesignBar, Dyson Building', desc: '각 워크숍 테크니컬 스태프들이 소재·샘플 전시. 워크숍 접근 방법 안내.', book:false },
+    { time: '10:00–13:00', title: 'Social Media Advice Desk', campus: 'Battersea', loc: 'DesignBar, Dyson Building', desc: 'RCA 소셜미디어팀과 상담, 콘텐츠 크리에이터 역할 안내.', book:false },
+    { time: '14:00–16:00', title: 'President & Vice-Chancellor welcome (Kensington)', campus: 'Kensington', loc: 'ArtBar, Darwin Building', desc: '인원 제한 웰컴 리셉션.', book:true },
+    { time: '16:00–22:00', title: 'Apperitivo night', campus: 'Kensington', loc: 'ArtBar, Frayling Building', desc: '스프리츠·네그로니 등 시음 + 스투지키니.', book:false }
+  ]},
+  { label: 'Fri', date: '11 Sep', events: [
+    { time: '10:00–11:00', title: 'Library orientation', campus: 'Kensington', loc: 'Lecture Theatre 1 (Kensington) / Gorvy (Battersea) / Online', desc: '도서관 서비스 소개.', book:false },
+    { time: '10:00–12:00', title: 'Stars Gym', campus: 'Battersea', loc: 'DesignBar, Dyson Building', desc: '로잉 챌린지 마지막 데이.', book:false },
+    { time: '11:00–16:00', title: 'Welcome Fair', campus: 'Kensington', loc: 'Canteen, Darwin Building', desc: '동아리·부서 부스, 프리비 증정하는 프레셔스 페어.', book:false },
+    { time: '13:00 / 16:00', title: 'Library tours', campus: 'Kensington', loc: 'Library, Frayling Building', desc: '도서관 투어.', book:false },
+    { time: '18:00–24:00', title: 'ArtBar Late Welcome Party', campus: 'Kensington', loc: 'ArtBar, Frayling Building', desc: '라이브 DJ, 할인 음료.', book:false }
+  ]},
+  { label: 'Mon', date: '14 Sep', events: [
+    { time: '12:00–14:00', title: 'Arts and crafts session', campus: 'Battersea', loc: 'DesignBar, Dyson Building', desc: 'SU와 함께하는 캐주얼 공예 시간.', book:false },
+    { time: '13:00 / 16:00', title: 'Library tours', campus: 'Kensington', loc: 'Library, Frayling Building', desc: '도서관 투어.', book:false },
+    { time: '16:00–17:00', title: 'South Kensington nature and climate guided tour', campus: 'Kensington', loc: 'Hyde Park', desc: '동네 자연·기후 변화 가이드 투어.', book:true }
+  ]},
+  { label: 'Tue', date: '15 Sep', events: [
+    { time: '10:00–15:00 (매시)', title: 'Rausing Research and Innovation building tour', campus: 'Battersea', loc: 'Rausing Building', desc: 'Helen Hamlyn Centre 등 7개 층 연구센터 소개 투어.', book:true },
+    { time: '12:00–14:00', title: 'Coffee and cake drop-in', campus: 'White City', loc: 'Café area', desc: 'SU와 커피·케이크.', book:false },
+    { time: '12:00–14:00', title: "Meet your new neighbours 'Lucky Dip'", campus: 'Battersea', loc: 'The Hangar', desc: 'Student Success 커뮤니티 활동.', book:false },
+    { time: '13:00 / 16:00', title: 'Library tours', campus: 'Kensington', loc: 'Library, Frayling Building', desc: '도서관 투어.', book:false },
+    { time: '17:00–19:00', title: 'Finding Your Voice workshop', campus: 'Battersea', loc: 'STU 01.005, Studio Building', desc: '국제 학생을 위한 자신감 워크숍 (RCA 동문 진행).', book:false },
+    { time: '18:00–22:00', title: 'Global mixer', campus: 'Kensington', loc: 'ArtBar, Frayling Building', desc: '전 세계 동기들과 만나는 믹서.', book:false }
+  ]},
+  { label: 'Wed', date: '16 Sep', events: [
+    { time: '11:00–13:00', title: 'Stars Gym', campus: 'Battersea', loc: 'DesignBar, Dyson Building', desc: '로잉 챌린지.', book:false },
+    { time: '12:00–14:00', title: 'Free house plants stall', campus: 'Kensington', loc: 'Courtyard Galleries, Darwin Building', desc: '무료 화분 나눔.', book:false },
+    { time: '14:00–16:00', title: 'Pre-sessional EAP Showcase', campus: 'Battersea', loc: 'DesignBar, Dyson Building', desc: 'Pre-sessional 학생 작업 전시.', book:false },
+    { time: '15:00–16:00', title: 'Gemini AI at the RCA — Introduction', campus: 'Online', loc: 'Zoom', desc: 'Google Gemini 입문 워크숍.', book:true },
+    { time: '18:00–', title: 'Pub Quiz at The Rose', campus: 'Battersea', loc: 'The Rose, Battersea', desc: '동네 펍에서 퀴즈의 밤.', book:false }
+  ]},
+  { label: 'Thu', date: '17 Sep', events: [
+    { time: '10:00–12:00', title: 'Stars Gym', campus: 'Battersea', loc: 'DesignBar, Dyson Building', desc: '로잉 챌린지.', book:false },
+    { time: '15:00–16:00', title: 'Gemini AI at the RCA — Advanced', campus: 'Online', loc: 'Zoom', desc: 'Gemini 심화 워크숍.', book:true },
+    { time: '16:00–17:00', title: 'South Kensington nature and climate guided tour', campus: 'Kensington', loc: 'Hyde Park', desc: '자연·기후 가이드 투어.', book:true },
+    { time: '17:00–19:00', title: 'Finding Your Voice workshop', campus: 'Battersea', loc: 'STU 01.005, Studio Building', desc: '국제 학생 자신감 워크숍.', book:false },
+    { time: '18:00–22:00', title: "'Open mic' night", campus: 'Kensington', loc: 'ArtBar, Frayling Building', desc: '오픈마이크 나이트.', book:false }
+  ]},
+  { label: 'Fri', date: '18 Sep', events: [
+    { time: '14:00–16:00', title: 'Pre-sessional EAP showcase', campus: 'Kensington', loc: 'Courtyard Galleries, Darwin Building', desc: 'Pre-sessional 학생 작업 전시.', book:false },
+    { time: '14:00–16:00', title: 'Make a Study Journal workshop', campus: 'White City', loc: 'Café area', desc: '스터디 저널 만들기 워크숍.', book:false },
+    { time: "19:00–late", title: "'Techs on Decks' party", campus: 'Kensington', loc: 'ArtBar, Frayling Building', desc: 'RCA 테크니션들의 DJ 파티.', book:false }
+  ]}
+];
+
+const tabsEl = document.getElementById('tabs');
+const panelsEl = document.getElementById('panels');
+
+days.forEach((day, i) => {
+  const tab = document.createElement('button');
+  tab.className = 'tab' + (i === 0 ? ' active' : '');
+  tab.innerHTML = `<span class="d">${day.label} ${day.date}</span><span class="count">${day.events.length}건</span>`;
+  tab.addEventListener('click', () => selectDay(i));
+  tabsEl.appendChild(tab);
+
+  const panel = document.createElement('div');
+  panel.className = 'day-panel' + (i === 0 ? ' active' : '');
+  panel.id = 'panel-' + i;
+
+  day.events
+    .slice()
+    .forEach(ev => {
+      const card = document.createElement('div');
+      card.className = 'event';
+      const color = CAMPUS_COLOR[ev.campus] || 'var(--muted)';
+      card.innerHTML = `
+        <div class="time">${ev.time}</div>
+        <div class="body">
+          <div class="meta">
+            <span class="campus-tag" style="background:${color}">${ev.campus}</span>
+            ${ev.book ? '<span class="book-tag">예약 필요</span>' : ''}
+          </div>
+          <h4>${ev.title}</h4>
+          <p class="loc">${ev.loc}</p>
+          <p class="desc">${ev.desc}</p>
+        </div>
+      `;
+      panel.appendChild(card);
+    });
+
+  const note = document.createElement('div');
+  note.className = 'repeat-note';
+  note.textContent = '+ Campus tour 10:30 / 11:30 / 12:30 (매일 진행)';
+  panel.appendChild(note);
+
+  panelsEl.appendChild(panel);
+});
+
+function selectDay(i) {
+  document.querySelectorAll('.tab').forEach((t, idx) => t.classList.toggle('active', idx === i));
+  document.querySelectorAll('.day-panel').forEach((p, idx) => p.classList.toggle('active', idx === i));
+}
+
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b === btn));
+    const mode = btn.dataset.mode;
+    document.getElementById('mode-welcome').classList.toggle('active', mode === 'welcome');
+    document.getElementById('mode-unit1').classList.toggle('active', mode === 'unit1');
+  });
+});
+
+const TBC = '장소 미정(TBC)';
+
+const unit1Weeks = [
+  {
+    label: 'Week 1', date: '7 September',
+    days: [
+      { dow: 'Mon', act: '', loc: '' },
+      { dow: 'Tue', act: 'Welcome Session', loc: 'Gorvy Theatre · 16:00–18:00' },
+      { dow: 'Wed', act: '', loc: '' },
+      { dow: 'Thu', act: '', loc: '' },
+      { dow: 'Fri', act: 'Studio Group Sessions', loc: 'Studio · 시간 추후 공지' }
+    ]
+  },
+  {
+    label: 'Week 2', date: '14 September',
+    days: [
+      { dow: 'Mon', act: 'Design Game', loc: 'Studio · 10:00–16:00' },
+      { dow: 'Tue', act: 'Lecture Block 1: Introduction to Service Design + Project Briefing', loc: 'Gorvy Theatre · 1.1 10:00–11:30 / 1.2 12:00–13:30' },
+      { dow: 'Wed', act: 'Independent Study', loc: '' },
+      { dow: 'Thu', act: 'Tutorial 1', loc: 'Varied Rooms · Varied Times' },
+      { dow: 'Fri', act: 'Tutorial 1', loc: 'Varied Rooms · Varied Times' }
+    ]
+  },
+  {
+    label: 'Week 3', date: '21 September',
+    days: [
+      { dow: 'Mon', act: 'Lecture Block 2: Introduction to SD Methods', loc: 'Gorvy Theatre and Studio' },
+      { dow: 'Tue', act: 'Lecture Block 2: Introduction to SD Methods (Ethics)', loc: 'Gorvy Theatre + Studio' },
+      { dow: 'Wed', act: 'Core Skills Briefing', loc: 'Gorvy Theatre' },
+      { dow: 'Thu', act: 'Tutorial 2', loc: 'Varied Rooms · Varied Times' },
+      { dow: 'Fri', act: 'Tutorial 2 + Computing & Technology Primer', loc: 'Varied Rooms · Varied Times' }
+    ]
+  },
+  {
+    label: 'Week 4', date: '28 September',
+    days: [
+      { dow: 'Mon', act: 'Across RCA Launch', loc: 'TBC' },
+      { dow: 'Tue', act: 'Lecture Block 3: Collaboration + Experience', loc: 'Hangar + Studio' },
+      { dow: 'Wed', act: 'Core Skills Workshop', loc: 'Gorvy Theatre' },
+      { dow: 'Thu', act: 'Tutorial 3', loc: 'Varied Rooms · Varied Times' },
+      { dow: 'Fri', act: 'Tutorial 3', loc: 'Varied Rooms · Varied Times' }
+    ]
+  },
+  {
+    label: 'Week 5', date: '5 October',
+    days: [
+      { dow: 'Mon', act: 'Independent Study', loc: '장소 미정(TBC)' },
+      { dow: 'Tue', act: 'Lecture Block 4: Value co-creation in service systems', loc: '장소 미정(TBC)' },
+      { dow: 'Wed', act: 'Independent Study', loc: '장소 미정(TBC)' },
+      { dow: 'Thu', act: 'Final Project Reviews', loc: '장소 미정(TBC)' },
+      { dow: 'Fri', act: 'Unit 1 Reflection: Prizes + Service Typologies', loc: '장소 미정(TBC)' }
+    ]
+  },
+  {
+    label: 'Week 6', date: '12 October',
+    days: [
+      { dow: 'Mon', act: '', loc: '' },
+      { dow: 'Tue', act: '', loc: '' },
+      { dow: 'Wed', act: '', loc: '' },
+      { dow: 'Thu', act: '', loc: '' },
+      { dow: 'Fri', act: '', loc: '' }
+    ]
+  },
+  {
+    label: 'Week 7', date: '19 October',
+    days: [
+      { dow: 'Mon', act: 'Unit 1 Reflection: Review', loc: 'Gorvy Theatre' },
+      { dow: 'Tue', act: '', loc: '' },
+      { dow: 'Wed', act: '', loc: '' },
+      { dow: 'Thu', act: '', loc: '' },
+      { dow: 'Fri', act: '', loc: '' }
+    ]
+  }
+];
+
+const unit1Tbody = document.getElementById('unit1-tbody');
+const DOW_KR = { Mon: '월', Tue: '화', Wed: '수', Thu: '목', Fri: '금' };
+unit1Weeks.forEach(week => {
+  const tr = document.createElement('tr');
+  const thHtml = `<th><span class="wk">${week.label}</span><span class="wkdate">${week.date}</span></th>`;
+  const tdsHtml = week.days.map(d => {
+    const isEmpty = !d.act;
+    return `<td class="${isEmpty ? 'empty' : ''}">
+      <p class="act">${d.act || '—'}</p>
+      ${d.loc ? `<p class="loc">${d.loc}</p>` : ''}
+    </td>`;
+  }).join('');
+  tr.innerHTML = thHtml + tdsHtml;
+  unit1Tbody.appendChild(tr);
+});
+
+const dowOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+const unit1CardsEl = document.getElementById('unit1-cards');
+
+unit1Weeks.forEach(week => {
+  const card = document.createElement('div');
+  card.className = 'unit-week-card';
+
+  const rowsHtml = dowOrder.map(dow => {
+    const d = week.days.find(x => x.dow === dow);
+    const isEmpty = !d || !d.act;
+    return `<div class="unit-row${isEmpty ? ' empty' : ''}">
+      <div class="dow">${DOW_KR[dow]}</div>
+      <div class="content">
+        <p class="act">${isEmpty ? '일정 없음' : d.act}</p>
+        ${!isEmpty && d.loc ? `<p class="loc">${d.loc}</p>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  card.innerHTML = `
+    <div class="unit-week-card-head">
+      <span class="wk">${week.label}</span>
+      <span class="wkdate">${week.date}</span>
+    </div>
+    ${rowsHtml}
+  `;
+  unit1CardsEl.appendChild(card);
+});
+</script>
+</body>
+</html>
