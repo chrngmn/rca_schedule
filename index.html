@@ -410,7 +410,7 @@
       <div id="unit1-cards"></div>
     </div>
 
-    <p class="repeat-note">출처: Unit 1 Timetable Overview 2026 v2 (PDF) · Week 5(10/5)는 요일별 정확한 장소 정보가 표에 없어 전부 '장소 미정(TBC)'으로 표시했습니다. Tutorial/Independent Study의 세부 시간·방은 추후 공지 예정입니다.</p>
+    <p class="repeat-note">출처: SD Welcome Session의 Unit 1 – Timetable Overview 사진 · 2026/09/09 반영. 시간은 런던 현지 기준입니다. '기재 없음'은 원본의 빈칸을 의미하며 휴강 확정이 아닙니다. Varied Rooms / Varied Times는 장소·시간이 각각 다르다는 뜻입니다. 9/30은 Tutorial 3와 Core Skills Workshop이 같은 칸에 있고, Gorvy Theatre · 15:30–17:30이 한 묶음으로 표기되어 일정별 적용 범위는 확인이 필요합니다. Unit 외 행사도 포함되어 있으므로 최신 일정은 Celcat 캘린더에서 확인하세요.</p>
   </div>
 
   <footer>Royal College of Art · Service Design · 2026/27</footer>
@@ -492,15 +492,28 @@ const days = [
 const tabsEl = document.getElementById('tabs');
 const panelsEl = document.getElementById('panels');
 
+// Use the campus date even when the visitor is in another time zone.
+function getInitialDayIndex(now = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London', year: 'numeric', month: 'numeric', day: 'numeric'
+  }).formatToParts(now);
+  const part = type => parts.find(p => p.type === type).value;
+  if (part('year') !== '2026' || Number(part('month')) !== 9) return 0;
+  const today = `${Number(part('day'))} Sep`;
+  const index = days.findIndex(day => day.date === today);
+  return index < 0 ? 0 : index;
+}
+const initialDayIndex = getInitialDayIndex();
+
 days.forEach((day, i) => {
   const tab = document.createElement('button');
-  tab.className = 'tab' + (i === 0 ? ' active' : '');
+  tab.className = 'tab' + (i === initialDayIndex ? ' active' : '');
   tab.innerHTML = `<span class="d">${day.label} ${day.date}</span><span class="count">${day.events.length}건</span>`;
   tab.addEventListener('click', () => selectDay(i));
   tabsEl.appendChild(tab);
 
   const panel = document.createElement('div');
-  panel.className = 'day-panel' + (i === 0 ? ' active' : '');
+  panel.className = 'day-panel' + (i === initialDayIndex ? ' active' : '');
   panel.id = 'panel-' + i;
 
   day.events
@@ -532,6 +545,11 @@ days.forEach((day, i) => {
   panelsEl.appendChild(panel);
 });
 
+// Keep the selected date visible in the horizontally scrolling tab strip.
+const initialTab = tabsEl.children[initialDayIndex];
+tabsEl.scrollLeft = Math.max(0, initialTab.offsetLeft - tabsEl.offsetLeft
+  - (tabsEl.clientWidth - initialTab.offsetWidth) / 2);
+
 function selectDay(i) {
   document.querySelectorAll('.tab').forEach((t, idx) => t.classList.toggle('active', idx === i));
   document.querySelectorAll('.day-panel').forEach((p, idx) => p.classList.toggle('active', idx === i));
@@ -550,57 +568,57 @@ const TBC = '장소 미정(TBC)';
 
 const unit1Weeks = [
   {
-    label: 'Week 1', date: '7 September',
+    label: 'Week 1', date: '7–11 September',
     days: [
       { dow: 'Mon', act: '', loc: '' },
       { dow: 'Tue', act: 'Welcome Session', loc: 'Gorvy Theatre · 16:00–18:00' },
       { dow: 'Wed', act: '', loc: '' },
       { dow: 'Thu', act: '', loc: '' },
-      { dow: 'Fri', act: 'Studio Group Sessions', loc: 'Studio · 시간 추후 공지' }
+      { dow: 'Fri', act: 'Studio Group Sessions', loc: 'Studio · 시간 상이 (추가 안내 예정)' }
     ]
   },
   {
-    label: 'Week 2', date: '14 September',
+    label: 'Week 2', date: '14–18 September',
     days: [
-      { dow: 'Mon', act: 'Design Game', loc: 'Studio · 10:00–16:00' },
+      { dow: 'Mon', act: 'Design Game', loc: 'Studio · 11:00–16:00' },
       { dow: 'Tue', act: 'Lecture Block 1: Introduction to Service Design + Project Briefing', loc: 'Gorvy Theatre · 1.1 10:00–11:30 / 1.2 12:00–13:30' },
       { dow: 'Wed', act: 'Independent Study', loc: '' },
-      { dow: 'Thu', act: 'Tutorial 1', loc: 'Varied Rooms · Varied Times' },
+      { dow: 'Thu', act: 'Tutorial 1 + Research Ethics Procedure (Online)', loc: 'Tutorial: Varied Rooms · Varied Times / Ethics: Online · 17:00–18:00' },
       { dow: 'Fri', act: 'Tutorial 1', loc: 'Varied Rooms · Varied Times' }
     ]
   },
   {
-    label: 'Week 3', date: '21 September',
+    label: 'Week 3', date: '21–25 September',
     days: [
-      { dow: 'Mon', act: 'Lecture Block 2: Introduction to SD Methods', loc: 'Gorvy Theatre and Studio' },
-      { dow: 'Tue', act: 'Lecture Block 2: Introduction to SD Methods (Ethics)', loc: 'Gorvy Theatre + Studio' },
-      { dow: 'Wed', act: 'Core Skills Briefing', loc: 'Gorvy Theatre' },
+      { dow: 'Mon', act: 'Lecture Block 2: Introduction to SD Methods', loc: 'Gorvy Theatre and Studio · 10:00–17:00' },
+      { dow: 'Tue', act: 'Lecture Block 2: Introduction to SD Methods (Ethics)', loc: 'Gorvy Theatre + Studio · 14:00–18:00' },
+      { dow: 'Wed', act: 'Core Skills Briefing', loc: 'Gorvy Theatre · 11:00–13:00' },
       { dow: 'Thu', act: 'Tutorial 2', loc: 'Varied Rooms · Varied Times' },
       { dow: 'Fri', act: 'Tutorial 2 + Computing & Technology Primer', loc: 'Varied Rooms · Varied Times' }
     ]
   },
   {
-    label: 'Week 4', date: '28 September',
+    label: 'Week 4', date: '28 September–2 October',
     days: [
       { dow: 'Mon', act: 'Across RCA Launch', loc: 'TBC' },
-      { dow: 'Tue', act: 'Lecture Block 3: Collaboration + Experience', loc: 'Hangar + Studio' },
-      { dow: 'Wed', act: 'Core Skills Workshop', loc: 'Gorvy Theatre' },
+      { dow: 'Tue', act: 'Lecture Block 3: Collaboration + Experience', loc: 'Hangar + Studio · 09:30–17:00' },
+      { dow: 'Wed', act: 'Tutorial 3 / Core Skills Workshop', loc: '원본 칸 표기: Gorvy Theatre · 15:30–17:30 (일정별 적용 범위 확인 필요)' },
       { dow: 'Thu', act: 'Tutorial 3', loc: 'Varied Rooms · Varied Times' },
       { dow: 'Fri', act: 'Tutorial 3', loc: 'Varied Rooms · Varied Times' }
     ]
   },
   {
-    label: 'Week 5', date: '5 October',
+    label: 'Week 5', date: '5–9 October',
     days: [
-      { dow: 'Mon', act: 'Independent Study', loc: '장소 미정(TBC)' },
-      { dow: 'Tue', act: 'Lecture Block 4: Value co-creation in service systems', loc: '장소 미정(TBC)' },
-      { dow: 'Wed', act: 'Independent Study', loc: '장소 미정(TBC)' },
-      { dow: 'Thu', act: 'Final Project Reviews', loc: '장소 미정(TBC)' },
-      { dow: 'Fri', act: 'Unit 1 Reflection: Prizes + Service Typologies', loc: '장소 미정(TBC)' }
+      { dow: 'Mon', act: 'Independent Study', loc: '' },
+      { dow: 'Tue', act: 'Lecture Block 4: Value co-creation in service systems', loc: 'Gorvy Theatre · 10:00–13:00' },
+      { dow: 'Wed', act: 'Independent Study', loc: '' },
+      { dow: 'Thu', act: 'Final Project Reviews', loc: 'Varied Rooms · Varied Times' },
+      { dow: 'Fri', act: 'Unit 1 Reflection: Prizes + Service Typologies', loc: 'Studio · 13:00–17:30' }
     ]
   },
   {
-    label: 'Week 6', date: '12 October',
+    label: 'Week 6', date: '12–16 October',
     days: [
       { dow: 'Mon', act: '', loc: '' },
       { dow: 'Tue', act: '', loc: '' },
@@ -610,11 +628,11 @@ const unit1Weeks = [
     ]
   },
   {
-    label: 'Week 7', date: '19 October',
+    label: 'Week 7', date: '19–23 October',
     days: [
       { dow: 'Mon', act: '', loc: '' },
       { dow: 'Tue', act: '', loc: '' },
-      { dow: 'Wed', act: 'Unit 1 Reflection: Review', loc: 'Gorvy Theatre' },
+      { dow: 'Wed', act: 'Unit 1 Reflection: Review', loc: 'Gorvy Theatre · 17:00–18:30' },
       { dow: 'Thu', act: '', loc: '' },
       { dow: 'Fri', act: '', loc: '' }
     ]
@@ -629,7 +647,7 @@ unit1Weeks.forEach(week => {
   const tdsHtml = week.days.map(d => {
     const isEmpty = !d.act;
     return `<td class="${isEmpty ? 'empty' : ''}">
-      <p class="act">${d.act || '—'}</p>
+      <p class="act">${d.act || '기재 없음'}</p>
       ${d.loc ? `<p class="loc">${d.loc}</p>` : ''}
     </td>`;
   }).join('');
@@ -650,7 +668,7 @@ unit1Weeks.forEach(week => {
     return `<div class="unit-row${isEmpty ? ' empty' : ''}">
       <div class="dow">${DOW_KR[dow]}</div>
       <div class="content">
-        <p class="act">${isEmpty ? '일정 없음' : d.act}</p>
+        <p class="act">${isEmpty ? '기재 없음' : d.act}</p>
         ${!isEmpty && d.loc ? `<p class="loc">${d.loc}</p>` : ''}
       </div>
     </div>`;
